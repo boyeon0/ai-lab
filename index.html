@@ -403,9 +403,9 @@ const KAKAO_JS_KEY='ff71b5bac36447809f11aa9d474802d5';
    Cloudflare에 올린 중계 서버 주소를 넣으세요. 예: 'https://ebeon-tago.아이디.workers.dev'
    공공데이터포털 인증키는 여기에 넣지 말고 중계 서버의 비밀 설정(TAGO_KEY)에만 넣으세요. */
 const API_BASE='';
-let KREADY=false,MAPS=[];
-if(KAKAO_JS_KEY){const go=()=>{try{kakao.maps.load(()=>{KREADY=true;render()})}catch(e){}};
- if(window.kakao&&window.kakao.maps&&window.kakao.maps.load)go();else{let tries=0;const add=()=>{tries++;const sc=document.createElement('script');sc.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+encodeURIComponent(KAKAO_JS_KEY)+(tries>1?'&r='+Date.now():'');sc.onload=go;sc.onerror=()=>{sc.remove();if(tries<4)setTimeout(add,1500*tries)};document.head.appendChild(sc)};add()}}
+let KREADY=false,MAPS=[],KSTAT='시작 전';
+if(KAKAO_JS_KEY){const go=()=>{try{KSTAT='지도 준비 중';kakao.maps.load(()=>{KREADY=true;KSTAT='완료';render()})}catch(e){KSTAT='지도 준비 실패: '+(e&&e.message||e)}};
+ if(window.kakao&&window.kakao.maps&&window.kakao.maps.load)go();else{let tries=0;const add=()=>{tries++;const sc=document.createElement('script');sc.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+encodeURIComponent(KAKAO_JS_KEY)+(tries>1?'&r='+Date.now():'');sc.onload=go;sc.onerror=()=>{sc.remove();KSTAT='카카오 지도 파일을 받지 못했어요('+tries+'번째 시도)';if(tries<4)setTimeout(add,1500*tries);else render()};document.head.appendChild(sc)};add()}}
 function drawK(){if(!KREADY)return;const K=kakao.maps;
  document.querySelectorAll('.kmap').forEach(el=>{const d=MAPS[+el.dataset.mi];if(!d)return;
   const L=ll=>new K.LatLng(ll[0],ll[1]),map=new K.Map(el,{center:L(d.nodes[0].ll),level:7}),bd=new K.LatLngBounds(),NS=d.guide&&d.me?d.nodes.concat([{ll:d.me}]):d.nodes;
@@ -461,7 +461,7 @@ function routeMap(steps,o={}){const extra={};[S.form.origin,S.trip&&S.trip.origi
   ${lines}${dots}${me}
   <g transform="translate(${W-22},22)"><path d="M0 -12L5 2L0 -1L-5 2z" fill="var(--ink)"/><text y="14" text-anchor="middle" font-size="10" fill="var(--mute)">N</text></g>
   <g transform="translate(14,${H-14})"><line x1="0" y1="0" x2="${(bar*kmPx).toFixed(1)}" y2="0" stroke="var(--ink)" stroke-width="2"/><text x="0" y="-5" font-size="10" fill="var(--mute)">${bar}km</text></g></svg>
-  <figcaption><ol class="mleg">${nodes.map((x,i)=>`<li><b>${i+1}</b>${esc(x.name)}</li>`).join('')}</ol><span>약도 · 실제 거리 비율로 그렸고, 도로를 따른 실제 경로는 아니에요. 진한 선은 버스, 점선은 도보·시내 이동${now!=null?', 주황색은 지금 또는 다음 이동':''}이에요.</span></figcaption></figure>`}
+  <figcaption><ol class="mleg">${nodes.map((x,i)=>`<li><b>${i+1}</b>${esc(x.name)}</li>`).join('')}</ol>${KAKAO_JS_KEY?`<small style="display:block;color:var(--coral)">카카오 지도 상태: ${esc(KSTAT)} · ${esc(location.host||'파일로 열림')}</small>`:''}<span>약도 · 실제 거리 비율로 그렸고, 도로를 따른 실제 경로는 아니에요. 진한 선은 버스, 점선은 도보·시내 이동${now!=null?', 주황색은 지금 또는 다음 이동':''}이에요.</span></figcaption></figure>`}
 const tl=(steps,now,dl)=>`<ol class="tl">${steps.map(s=>stepHTML(s,now,dl)).join('')}</ol>`;
 const illoPre=`<svg viewBox="0 0 96 80" aria-hidden="true"><rect x="8" y="10" width="62" height="60" rx="10" fill="var(--lake2)" stroke="var(--lake)" stroke-width="2"/><rect x="8" y="10" width="62" height="16" rx="8" fill="var(--lake)"/><g fill="var(--lake)">${[0,1,2].map(r=>[0,1,2].map(c=>`<rect x="${16+c*17}" y="${34+r*11}" width="11" height="6" rx="2" opacity="${r===1&&c===1?1:.35}"/>`).join('')).join('')}</g><circle cx="74" cy="56" r="16" fill="var(--coral)"/><path d="M66 56l6 6l10-12" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const illoDur=`<svg viewBox="0 0 96 80" aria-hidden="true"><path d="M0 60L22 34L36 46L56 22L80 50L96 40V80H0z" fill="var(--lake2)"/><rect x="14" y="40" width="58" height="26" rx="7" fill="var(--lake)"/><rect x="20" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="36" y="45" width="12" height="9" rx="2" fill="#fff" opacity=".85"/><rect x="52" y="45" width="14" height="9" rx="2" fill="#fff" opacity=".85"/><circle cx="26" cy="67" r="5" fill="var(--ink)"/><circle cx="60" cy="67" r="5" fill="var(--ink)"/><circle cx="76" cy="20" r="14" fill="var(--paper)" stroke="var(--coral)" stroke-width="3"/><path d="M76 12v8l6 4" stroke="var(--coral)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
