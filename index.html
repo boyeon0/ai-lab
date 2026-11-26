@@ -405,7 +405,7 @@ const KAKAO_JS_KEY='ff71b5bac36447809f11aa9d474802d5';
 const API_BASE='';
 let KREADY=false,MAPS=[];
 if(KAKAO_JS_KEY){const go=()=>{try{kakao.maps.load(()=>{KREADY=true;render()})}catch(e){}};
- if(window.kakao&&window.kakao.maps)go();else{const sc=document.createElement('script');sc.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+encodeURIComponent(KAKAO_JS_KEY);sc.onload=go;document.head.appendChild(sc)}}
+ if(window.kakao&&window.kakao.maps&&window.kakao.maps.load)go();else{let tries=0;const add=()=>{tries++;const sc=document.createElement('script');sc.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+encodeURIComponent(KAKAO_JS_KEY)+(tries>1?'&r='+Date.now():'');sc.onload=go;sc.onerror=()=>{sc.remove();if(tries<4)setTimeout(add,1500*tries)};document.head.appendChild(sc)};add()}}
 function drawK(){if(!KREADY)return;const K=kakao.maps;
  document.querySelectorAll('.kmap').forEach(el=>{const d=MAPS[+el.dataset.mi];if(!d)return;
   const L=ll=>new K.LatLng(ll[0],ll[1]),map=new K.Map(el,{center:L(d.nodes[0].ll),level:7}),bd=new K.LatLngBounds(),NS=d.guide&&d.me?d.nodes.concat([{ll:d.me}]):d.nodes;
