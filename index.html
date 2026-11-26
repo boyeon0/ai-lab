@@ -175,6 +175,12 @@ ol.tl li.now .c b::after{content:" · 지금";color:var(--coral);font-size:14px}
 .flash{animation:fl 1s ease-out}@keyframes fl{from{border-color:var(--coral);box-shadow:0 0 0 4px var(--coral2)}}
 @media(prefers-reduced-motion:reduce){.flash{animation:none}}
 .check{width:72px;height:72px;border-radius:50%;background:var(--ok2);color:var(--ok);display:grid;place-items:center;font-size:38px;margin:10px 0 14px}
+.pinfo{margin:8px 0 2px;border:1px solid var(--line);border-radius:12px;background:var(--lake2);color:var(--ink)}
+.pinfo summary{cursor:pointer;padding:9px 12px;min-height:40px;font-size:14px;font-weight:600;color:var(--lake);list-style-position:inside}
+:root[data-theme=dark] .pinfo summary{color:#8fd0ff}@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pinfo summary{color:#8fd0ff}}
+.pinfo p{margin:0;padding:0 12px 8px;font-size:15px;line-height:1.6;word-break:keep-all}
+.pinfo .ptip{color:var(--mute);font-size:14px;padding-bottom:11px}
+.status+.pinfo,.pinfo[open]:not(li .pinfo){margin:12px 0}
 </style>
 </head>
 <body>
@@ -258,6 +264,35 @@ const REG={
  {name:'경포 해변 숙소',ll:[37.8,128.905],kind:'숙소',min:25,al:['경포','호텔','펜션','숙소']}
 ]}
 };
+/* 관광지 소개: d = 어떤 곳인지, tip = 가기 전에 알아 두면 좋은 점 */
+const INFO={
+ dam:{d:'1973년에 완공된 우리나라 최대 규모의 흙·돌 댐(사력댐)이에요. 댐 위를 걸으며 넓은 소양호와 산줄기를 한눈에 볼 수 있고, 선착장에서는 청평사로 가는 배가 다녀요.',tip:'댐 위는 바람이 세서 봄·가을에도 겉옷이 있으면 좋아요.'},
+ mun:{d:'「봄·봄」「동백꽃」을 쓴 소설가 김유정의 고향 실레마을에 있어요. 복원한 생가와 기념전시관이 있고, 소설 속 장소를 따라 걷는 실레이야기길이 마을을 한 바퀴 돌아요.',tip:'경춘선 김유정역에서 걸어서 갈 수 있어 기차 여행과 묶기 좋아요.'},
+ fall:{d:'봉화산 자락에 있는 높이 약 50m의 폭포예요. 매표소에서 계곡을 따라 1km 남짓 숲길을 걸어 들어가며, 겨울에는 꽁꽁 언 빙벽을 볼 수 있어요.',tip:'흙길과 계단이 있어 운동화가 편해요.'},
+ ani:{d:'애니메이션의 역사와 만드는 과정을 보고 직접 체험하는 박물관이에요. 옛 만화 영화 자료와 목소리 녹음(더빙) 체험이 있고, 옆에 로봇 전시관도 있어요.',tip:'실내라 비 오는 날 일정으로 좋아요.'},
+ cable:{d:'의암호 위를 가로질러 삼악산 중턱까지 오르는 케이블카예요. 바닥이 투명한 캐빈을 고르면 발아래 호수가 그대로 보이고, 위쪽 전망대에서 춘천 시내와 호수가 내려다보여요.',tip:'바람이 강한 날은 운행을 멈출 수 있어요.'},
+ noodle:{d:'춘천의 대표 음식 막국수의 역사와 메밀 이야기를 전시하는 박물관이에요. 반죽을 틀에 눌러 면을 뽑는 막국수 만들기 체험을 할 수 있어요.',tip:'체험은 시간이 정해져 있을 수 있어 미리 확인하면 좋아요.'},
+ lego:{d:'의암호 가운데 섬 중도에 있는 레고 테마파크예요. 놀이기구와 레고 블록으로 만든 미니랜드, 체험 공간이 있어 하루를 통째로 보내기 좋아요.',tip:'입장권은 온라인으로 미리 사면 편해요.'},
+ dak:{d:'춘천 닭갈비 식당이 모여 있는 시내 골목이에요. 큰 철판에 양념한 닭과 채소를 볶아 먹고, 마지막에 남은 양념에 밥을 볶아 마무리해요.',tip:'점심·저녁 시간엔 줄이 길어 조금 일찍 가면 좋아요.'},
+ market:{d:'춘천 시내의 오래된 전통시장으로 ‘낭만시장’이라고도 불러요. 지붕이 있는 골목에 먹거리 가게와 반찬·건어물 가게가 이어져요.',tip:'육림고개, 명동과 붙어 있어 걸어서 함께 돌기 좋아요.'},
+ yuk:{d:'중앙시장 옆 오래된 고갯길이에요. 한동안 조용했던 골목에 청년 상인들의 가게와 카페, 공방이 들어서 사진 찍기 좋은 거리가 됐어요.',tip:'가게마다 쉬는 날이 달라 평일 낮엔 일부 문을 닫을 수 있어요.'},
+ gong:{d:'의암호로 흘러드는 하천을 따라 만든 공원이에요. 호숫가 산책로와 조각공원, 에티오피아 한국전 참전 기념관이 있고 주변에 카페가 모여 있어요.',tip:'해 질 무렵 호숫가 산책이 특히 좋아요.'},
+ sky:{d:'소양강 위로 길게 뻗은 투명 유리 바닥 전망대예요. 발밑으로 강물이 보이고, 바로 옆에 노래로 유명한 소양강 처녀상이 있어요.',tip:'유리 바닥을 보호하려고 덧신을 신고 들어가요.'},
+ gyeongpo:{d:'강릉을 대표하는 해변으로 긴 모래사장과 소나무 숲이 이어져요. 해변 바로 뒤 경포호에는 둘레길이 있어 걷거나 자전거를 타기 좋고, 호숫가 언덕에 정자 경포대가 있어요.',tip:'호수 둘레길은 한 바퀴 약 4km라 일부만 걸어도 충분해요.'},
+ anmok:{d:'바다를 바로 앞에 둔 카페들이 줄지어 선 거리예요. 바닷가 커피 자판기에서 시작해 지금은 ‘커피 도시 강릉’을 상징하는 곳이 됐어요.',tip:'창가 자리는 오전이 비교적 한가해요.'},
+ ojuk:{d:'신사임당과 율곡 이이가 태어난 집이에요. 조선 중기 건물인 몽룡실은 보물로 지정돼 있고, 줄기가 검은 대나무 ‘오죽’이 집 둘레에 자라 이름이 붙었어요.',tip:'같은 터에 강릉시립박물관이 있어 함께 보기 좋아요.'},
+ seongyo:{d:'조선 후기 사대부가 대대로 살아온 큰 한옥이에요. 연못 위에 세운 정자 활래정이 특히 아름답고, 여러 채의 집이 옛 모습 그대로 남아 있어요.',tip:'오죽헌과 가까워 둘을 묶어 다니기 좋아요.'},
+ chodang:{d:'바닷물로 두부를 굳히는 초당두부로 유명한 마을이에요. 순두부 식당이 모여 있고, 소나무 숲 사이에 허균·허난설헌 기념공원이 있어요.',tip:'식사 뒤 순두부 젤라또를 맛보는 것도 별미예요.'},
+ sori:{d:'세계 여러 나라의 축음기와 에디슨이 발명한 물건을 모아 전시한 박물관이에요. 옛 축음기로 음악을 들려주는 시연이 있어요.',tip:'안내 해설을 들으며 보면 훨씬 재미있어요.'},
+ jumunjin:{d:'동해안을 대표하는 항구의 수산시장이에요. 그날 들어온 오징어, 대게, 생선을 구경하고 회센터나 식당에서 바로 먹을 수 있어요.',tip:'항구 옆 방파제와 해변까지 걸으면 바다 풍경을 더 즐길 수 있어요.'},
+ jeongdong:{d:'바다와 아주 가까운 기차역으로 유명한 해돋이 명소예요. 역 앞 모래사장에서 바로 동해를 볼 수 있고, 근처에 커다란 모래시계가 있는 공원이 있어요.',tip:'해돋이를 보려면 해 뜨기 20~30분 전에 도착하면 좋아요.'},
+ haslla:{d:'바닷가 언덕 위에 있는 미술관이자 조각공원이에요. 실내 전시와 함께 바다를 내려다보는 야외 정원 산책길이 이어져요.',tip:'야외 정원은 경사가 있어 편한 신발이 좋아요.'},
+ jungang:{d:'강릉 시내의 큰 전통시장이에요. 닭강정, 장칼국수, 감자전 같은 강릉 먹거리를 한곳에서 맛볼 수 있어요.',tip:'명주동, 월화거리와 붙어 있어 걸어서 함께 돌기 좋아요.'},
+ myeongju:{d:'강릉의 옛 도심 골목이에요. 오래된 집을 고친 카페와 작은 공연장이 있고, 옛 관청 건물인 강릉대도호부 관아가 가까워요.',tip:'골목이 좁아 천천히 걸으며 구경하기 좋아요.'},
+ wolhwa:{d:'옛 기찻길이 지나던 자리를 걷는 길로 바꾼 도심 산책로예요. 남대천을 건너는 월화교가 있고, 밤에는 조명이 켜져 야경이 예뻐요.',tip:'중앙시장에서 바로 이어져 식사 뒤 산책 코스로 좋아요.'}
+};
+const iesc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const infoHTML=(p,open)=>{const x=INFO[p.id],esc=iesc;return x?`<details class="pinfo"${open?' open':''}><summary>${open?esc(p.name)+' 소개':'어떤 곳인가요?'}</summary><p>${esc(x.d)}</p><p class="ptip">알아 두면 좋아요 · ${esc(x.tip)}</p></details>`:''};
 let REGION,P,ORIGINS,HUB;
 /* 일출·일몰 계산 (천문 공식, 해발 0m 기준, 발표값과 1~2분 오차) */
 function sunTimes(dateStr,ll){const rad=Math.PI/180,dayMs=864e5,J1970=2440588,J2000=2451545,e=rad*23.4397,J0=.0009,lat=ll[0],lng=ll[1];
@@ -418,7 +453,7 @@ function stepHTML(s,now,dl){
  if(s.k==='walk')return`<li class="walk${state}"><span class="t" style="font-size:15px;font-weight:600">${hm(s.t)}</span><span class="dot"><i></i></span><span class="c">${esc(s.to)}(으)로 이동 · 도보·시내버스 ${s.min}분</span></li>`;
  if(s.k==='bus'){const[g,l]=grade(s.gap);return`<li class="bus${state}"><span class="t">${hm(s.dep)}</span><span class="dot"><i></i></span><span class="c"><b><span class="rno">${s.no}번</span> 버스 · ${esc(s.to)} 방면</b><span class="stops"><span><i class="on">타는 곳</i>${esc(s.fromStop||s.from)}</span><span><i>내리는 곳</i>${esc(s.toStop||s.to)} · ${hm(s.arr)} 도착 (${s.arr-s.dep}분)</span></span><span class="badge ${g}">${l}</span></span></li>`}
  const plus=s.leave-s.arr-s.base;
- return`<li class="stay${state}"><span class="t">${hm(s.arr)}</span><span class="dot"><i></i></span><span class="c"><b>${esc(s.p.name)}</b>${s.leave-s.arr}분 머물기 · ${hm(s.leave)}까지${plus>0&&s.p.remote?`<br><span class="badge b-ok">버스 시간에 맞춰 +${plus}분 여유</span>`:''}${(()=>{const z=sunNow();return sees(s,z.set)?`<br><span class="badge b-sun">일몰 ${hm(z.set)} · 노을 보기 좋은 곳</span>`:sees(s,z.rise)?`<br><span class="badge b-sun">일출 ${hm(z.rise)} · 해돋이 보기 좋은 곳</span>`:''})()}${s.extras.map(x=>`<span class="extra">+ ${esc(x.name)} ${x.mins}분</span>`).join('')}${memoOf(s.p.id)?`<span class="memo">메모 · ${esc(memoOf(s.p.id))}</span>`:''}${S.screen==='pre3'&&!(curPlan()||{}).edited?`<br><button class="mini" data-act="drop" data-id="${s.p.id}">이 장소 빼고 다시 짜기</button>`:''}</span></li>`}
+ return`<li class="stay${state}"><span class="t">${hm(s.arr)}</span><span class="dot"><i></i></span><span class="c"><b>${esc(s.p.name)}</b>${s.leave-s.arr}분 머물기 · ${hm(s.leave)}까지${plus>0&&s.p.remote?`<br><span class="badge b-ok">버스 시간에 맞춰 +${plus}분 여유</span>`:''}${(()=>{const z=sunNow();return sees(s,z.set)?`<br><span class="badge b-sun">일몰 ${hm(z.set)} · 노을 보기 좋은 곳</span>`:sees(s,z.rise)?`<br><span class="badge b-sun">일출 ${hm(z.rise)} · 해돋이 보기 좋은 곳</span>`:''})()}${s.extras.map(x=>`<span class="extra">+ ${esc(x.name)} ${x.mins}분</span>`).join('')}${infoHTML(s.p)}${memoOf(s.p.id)?`<span class="memo">메모 · ${esc(memoOf(s.p.id))}</span>`:''}${S.screen==='pre3'&&!(curPlan()||{}).edited?`<br><button class="mini" data-act="drop" data-id="${s.p.id}">이 장소 빼고 다시 짜기</button>`:''}</span></li>`}
 function routeMap(steps,o={}){const extra={};[S.form.origin,S.trip&&S.trip.origin,S.trip&&S.trip.endOrigin,...(S.multi||[]).flatMap(d=>[d.origin,d.endOrigin])].forEach(x=>{if(x&&x.ll)extra[x.name]=x.ll});
  const LL=n=>extra[n]||llOfName(n),nodes=[],segs=[],idx=n=>{let k=nodes.findIndex(x=>x.name===n);if(k<0){nodes.push({name:n,ll:LL(n),hub:n===HUB.name});k=nodes.length-1}return k};
  for(const st of steps){if(st.k==='start'||st.k==='end')idx(st.at);else if(st.k==='stay')idx(st.p.name);
@@ -578,7 +613,7 @@ const screens={
   const big=nx?`<div class="big"><strong>${nx.dep-now}분</strong><span>뒤 다음 버스</span></div><div class="sub"><span class="rno w">${nx.no}번</span> ${hm(nx.dep)} ${esc(nx.fromStop||nx.from)}에서 타서 ${esc(nx.toStop||nx.to)}에서 내려요  · 정류장에 ${hm(nx.dep-5)}까지</div>`:`<div class="big"><strong>${hm(end.t)}</strong><span>춘천역 도착</span></div><div class="sub">남은 버스가 없어요</div>`;
   const al=S.loc.mode!=='real'&&S.loc.mode!=='demo'&&nx&&nx.dep-5-now<=10&&nx.dep-5-now>=0&&!onBus?`<div class="alert">지금 정류장으로 출발하세요 (${nx.dep-5-now}분 남음)</div>`:'';
   const perm=S.loc.mode==='off'?`<div class="perm" id="perm"><b>내 위치를 켜 주세요</b><p>지금 있는 곳을 알아야 정류장까지 걷는 시간과 출발할 시각을 정확히 알려 드려요. 위치는 이 기기 안에서만 쓰고 서버에 저장하지 않아요.</p><div class="row2"><button class="btn" data-act="locAllow">위치 사용 허용</button><button class="btn ghost" data-act="locLater">나중에</button></div></div>`:'';
-  return`${T.saved&&T.saved.multi?`<div class="tabs">${T.saved.days.map((d,i)=>`<button class="${i===T.day?'on':''}" data-act="tripDay" data-i="${i}">${i+1}일차 · ${md(d.date)}</button>`).join('')}</div>`:''}${perm}<div class="status"><div class="where">${where}</div>${big}${al}</div><div id="locbox">${locHTML()}</div>${sunLine()}
+  return`${T.saved&&T.saved.multi?`<div class="tabs">${T.saved.days.map((d,i)=>`<button class="${i===T.day?'on':''}" data-act="tripDay" data-i="${i}">${i+1}일차 · ${md(d.date)}</button>`).join('')}</div>`:''}${perm}<div class="status"><div class="where">${where}</div>${big}${al}</div>${cur?infoHTML(cur.p,1):''}<div id="locbox">${locHTML()}</div>${sunLine()}
   ${nx?`<button class="miss" data-act="missed">버스를 놓쳤어요!</button>`:''}
   <div class="demo">시연용 시계 <b>${hm(now)}</b><button data-act="clock" data-d="-10">−10분</button><button data-act="clock" data-d="10">+10분</button><button data-act="clock" data-d="30">+30분</button><button data-act="nextStep">다음 단계로</button><button class="x" data-act="cancelBus">결행 발생</button>${S.loc.mode==='demo'?`<button data-act="locFar">${S.loc.far?'정류장 쪽으로 돌아오기':'정류장에서 800m 멀어지기'}</button>`:''}</div>
   ${routeMap(st,{now,me:(locNow()||{}).ll})}
